@@ -2,92 +2,93 @@
 <script src="js/pixi.js"></script>
 <style>
     html {
-    display: table;
-    margin: auto;
-}
+        display: table;
+        margin: auto;
+    }
 
-body {
-    display: table-cell;
-    vertical-align: middle;
-}
+    body {
+        display: table-cell;
+        vertical-align: middle;
+    }
 </style>
 
 <body>
     <script type="text/javascript">
         // Keyboard Input
-        let totalenem = 4, hero, hit = [], state, enemy = [], Stitle, endT, end = 0, sheet, f, score = 0, sp = 1, dp = 0, sText = "Score : ", highscore = 0, hText = "Highscore :"
+        let totalenem = 4, hero, hit = [], state, enemy = [], Stitle, endT, end = 0, sheet, f, score = 0, sp = 1, dp = 0, sText = "Score : ", highscore = 0, hText = "Highscore :", difficulty = 1
+        let startM, movAllow = false, exp
         function keyboard(value) {
-            let key = {};
-            key.value = value;
-            key.isDown = false;
-            key.isUp = true;
-            key.press = undefined;
-            key.release = undefined;
+            let key = {}
+            key.value = value
+            key.isDown = false
+            key.isUp = true
+            key.press = undefined
+            key.release = undefined
             //The `downHandler`
             key.downHandler = event => {
                 if (event.key === key.value) {
-                    if (key.isUp && key.press) key.press();
-                    key.isDown = true;
-                    key.isUp = false;
-                    event.preventDefault();
+                    if (key.isUp && key.press) key.press()
+                    key.isDown = true
+                    key.isUp = false
+                    event.preventDefault()
                 }
-            };
+            }
 
             //The `upHandler`
             key.upHandler = event => {
                 if (event.key === key.value) {
-                    if (key.isDown && key.release) key.release();
-                    key.isDown = false;
-                    key.isUp = true;
-                    event.preventDefault();
+                    if (key.isDown && key.release) key.release()
+                    key.isDown = false
+                    key.isUp = true
+                    event.preventDefault()
                 }
-            };
+            }
 
             //Attach event listeners
-            const downListener = key.downHandler.bind(key);
-            const upListener = key.upHandler.bind(key);
+            const downListener = key.downHandler.bind(key)
+            const upListener = key.upHandler.bind(key)
 
             window.addEventListener(
                 "keydown", downListener, false
-            );
+            )
             window.addEventListener(
                 "keyup", upListener, false
-            );
+            )
 
             // Detach event listeners
             key.unsubscribe = () => {
-                window.removeEventListener("keydown", downListener);
-                window.removeEventListener("keyup", upListener);
-            };
+                window.removeEventListener("keydown", downListener)
+                window.removeEventListener("keyup", upListener)
+            }
 
-            return key;
+            return key
         }
         function hitTest(r1, r2) {
             //Define the variables we'll need to calculate
-            let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+            let hit, combinedHalfWidths, combinedHalfHeights, vx, vy
 
             //hit will determine whether there's a collision
-            hit = false;
+            hit = false
 
             //Find the center points of each sprite
-            r1.centerX = r1.x + r1.width / 2;
-            r1.centerY = r1.y + r1.height / 2;
-            r2.centerX = r2.x + r2.width / 2;
-            r2.centerY = r2.y + r2.height / 2;
+            r1.centerX = r1.x + r1.width / 2
+            r1.centerY = r1.y + r1.height / 2
+            r2.centerX = r2.x + r2.width / 2
+            r2.centerY = r2.y + r2.height / 2
 
             //Find the half-widths and half-heights of each sprite
-            r1.halfWidth = r1.width / 2;
-            r1.halfHeight = r1.height / 2;
-            r2.halfWidth = r2.width / 2;
-            r2.halfHeight = r2.height / 2;
+            r1.halfWidth = r1.width / 2 - 5
+            r1.halfHeight = r1.height / 2 - 5
+            r2.halfWidth = r2.width / 2 - 5
+            r2.halfHeight = r2.height / 2 - 5
 
             //Calculate the distance vector between the sprites
-            vx = r1.centerX - r2.centerX;
-            vy = r1.centerY - r2.centerY;
+            vx = r1.centerX - r2.centerX
+            vy = r1.centerY - r2.centerY
 
             //Figure out the combined half-widths and half-heights
-            combinedHalfWidths = r1.halfWidth + r2.halfWidth;
-            combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+            combinedHalfWidths = r1.halfWidth + r2.halfWidth
+            combinedHalfHeights = r1.halfHeight + r2.halfHeight
 
             //Check for a collision on the x axis
             if (Math.abs(vx) < combinedHalfWidths) {
@@ -96,20 +97,20 @@ body {
                 if (Math.abs(vy) < combinedHalfHeights) {
 
                     //There's definitely a collision happening
-                    hit = true;
+                    hit = true
                 } else {
 
                     //There's no collision on the y axis
-                    hit = false;
+                    hit = false
                 }
             } else {
 
                 //There's no collision on the x axis
-                hit = false;
+                hit = false
             }
 
             //`hit` will be either `true` or `false`
-            return hit;
+            return hit
         }
         // Creating A Canvas
         let app = new PIXI.Application({ position: "absolute", display: "block", autoResize: false, height: 600, width: 500 })
@@ -119,23 +120,37 @@ body {
         loader = PIXI.Loader.shared
             .add("assets/v1.png")
             .add("assets/tileset.json")
+            //.add("assets/explosion.json")
             .load(setup)
         function setup() {
             let Tstyle = new PIXI.TextStyle({ fill: "white" })
             let Estyle = new PIXI.TextStyle({ fill: "white", fontSize: 30, dropShadow: true, align: "center" })
+            startM = new PIXI.TextStyle({ fill: "white", fontSize: 30, dropShadow: true, align: "center" })
             Stitle = new PIXI.Text(sText + score, Tstyle)
             Htitle = new PIXI.Text(hText + highscore, Tstyle)
+            startM = new PIXI.Text("SPING SPONG\nPress F to start", Estyle)
             endT = new PIXI.Text("GAME OVER \n press F to restart ", Estyle)
             Stitle.position.set((app.view.width / 2) - 80, 20)
             Htitle.position.set((app.view.width / 2) - 80, 50)
             endT.position.set((app.view.width / 2) - 120, (app.view.height / 2) - 100)
+            startM.position.set((app.view.width / 2) - 110, (app.view.height / 2) - 50)
+            app.stage.addChild(startM)
+            startMenu()
             app.stage.addChild(Stitle)
             app.stage.addChild(Htitle)
             endT.visible = false
             app.stage.addChild(endT)
-            sheet = PIXI.Loader.shared.resources["assets/tileset.json"].spritesheet;
+            sheet = PIXI.Loader.shared.resources["assets/tileset.json"].spritesheet
+            //expsheet = PIXI.Loader.shared.resources["assets/explosion.json"].spritesheet
             // selecting image from spritesheet
-            hero = new PIXI.Sprite(sheet.textures["idle.png"])
+            //hero = new PIXI.Sprite(sheet.textures["idle.png"])
+            hero = new PIXI.AnimatedSprite(sheet.animations["run"])
+            //exp = new PIXI.AnimatedSprite(expsheet.animations["explosion"])
+            // set speed, start playback and add it to the stage
+            hero.animationSpeed = 0.067
+           // exp.animationSpeed = 0.067
+            hero.play()
+            //exp.play()
             let balloon = PIXI.Sprite.from("assets/v1.png")
             /* Setting position
             balloon.x = 96
@@ -154,31 +169,52 @@ body {
             balloon.visible = false
             // adding multiple enemies with random y and distance between them
             // setting hero location and scale
-            hero.position.set(20, (app.view.height) / 2)
+            hero.position.set(30, (app.view.height) / 2)
             hero.scale.set(2, 2)
+           // exp.scale.set(2, 2)
+            hero.pivot.set(14,14)
+            //exp.pivot.set(14,14)
             hero.vx = 0
+            //exp.visible = false
             state = play
             app.stage.addChild(hero)
+            //app.stage.addChild(exp)
             Initenemy()
             let right = keyboard("d"), left = keyboard("a")
-            right.press = () => { hero.vx = 2 }
+            right.press = () => {
+                hero.vx = 2 
+                hero.scale.x = 2
+            }
             right.release = () => {
                 if (!left.isDown)
                     hero.vx = 0
             }
-            left.press = () => { hero.vx = -2 }
+            left.press = () => { 
+            hero.vx = -2
+            hero.scale.x = -2
+            }
             left.release = () => {
                 if (!right.isDown)
                     hero.vx = 0
             }
             app.ticker.add(delta => gameloop(delta))
         }
+        function startMenu() {
+            f = keyboard("f")
+            f.press = () => {
+                startM.visible = false
+                movAllow = true
+            }
+        }
         function Initenemy() {
             let xoffset = 80
             spacing = 30
             for (i = 1; i <= totalenem; i++) {
-                let tenemy = new PIXI.Sprite(sheet.textures["enemy1.png"]);
+                let tenemy = new PIXI.AnimatedSprite(sheet.animations["enemy"])
+                tenemy.animationSpeed = 0.067
+                tenemy.play()
                 tenemy.scale.set(2, 2)
+                tenemy.pivot.set(14,14)
                 yloc = rInt(40, app.view.height - tenemy.height - 40)
                 tenemy.position.set(xoffset = (i * spacing) + xoffset, yloc)
                 hit.push(0)
@@ -197,7 +233,7 @@ body {
                 for (i = 1; i <= totalenem; i++) {
                     if (hit[i - 1] == 0) {
                         if (enemy[i - 1].y < app.view.height - enemy[i - 1].height - 40) {
-                            enemy[i - 1].vy = 1
+                            enemy[i - 1].vy = 1 * difficulty
                             enemy[i - 1].y += enemy[i - 1].vy
                         }
                         else
@@ -205,7 +241,7 @@ body {
                     }
                     else {
                         if (enemy[i - 1].y > 40) {
-                            enemy[i - 1].vy = -1
+                            enemy[i - 1].vy = -1 * difficulty
                             enemy[i - 1].y += enemy[i - 1].vy
                         }
                         else
@@ -215,45 +251,52 @@ body {
                         f = keyboard("f")
                         endT.visible = true
                         end = true
+                        //exp.position.set(hero.x,hero.y)
+                        //exp.visible = true
                         f.press = () => { restart() }
                     }
                 }
-                if(hero.x < 430){
-                    if(hero.x == 20 && hero.vx == -2){
-                        if(dp == 1){
-                            dp = 0
-                            sp = 1
-                            score += 50
-                            if(score > highscore)
-                                highscore = score
+                if (movAllow) {
+                    if (hero.x < 470) {
+                        if (hero.x == 30 && hero.vx == -2) {
+                            if (dp == 1) {
+                                dp = 0
+                                sp = 1
+                                score += 50
+                                difficulty += 0.25
+                                if (score > highscore)
+                                    highscore = score
+                            }
+                            hero.x = 30
                         }
-                        hero.x = 20
+                        else
+                            hero.x += hero.vx
                     }
                     else
-                        hero.x += hero.vx
-                }
-                else
-                    if(hero.x == 430 && hero.vx == 2){
-                        if(sp == 1){
-                            dp = 1
-                            sp = 0
-                            score += 50
-                            if(score > highscore)
-                                highscore = score
+                        if (hero.x == 470 && hero.vx == 2) {
+                            if (sp == 1) {
+                                dp = 1
+                                sp = 0
+                                score += 50
+                                if (score > highscore)
+                                    highscore = score
 
+                            }
+                            hero.x = 470
                         }
-                        hero.x = 430
-                    }
                         else
                             hero.x += hero.vx
                 }
+            }
         }
         function restart() {
-            hero.position.set(20, (app.view.height) / 2)
+            hero.position.set(30, (app.view.height) / 2)
             endT.visible = false
             score = 0
             sp = 1
             dp = 0
+            difficulty = 1
+            //exp.visible = false
             for (i = 0; i <= totalenem; i++) {
                 app.stage.removeChild(enemy[i - 1])
             }

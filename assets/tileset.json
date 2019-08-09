@@ -2,29 +2,63 @@
 
 "enemy1.png":
 {
-	"frame": {"x":0,"y":0,"w":22,"h":24},
+	"frame": {"x":1,"y":1,"w":22,"h":24},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":24},
 	"sourceSize": {"w":22,"h":24}
 },
-"idle.png":
+"enemy2.png":
 {
-	"frame": {"x":22,"y":0,"w":28,"h":28},
+	"frame": {"x":33,"y":1,"w":22,"h":24},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":22,"h":24},
+	"sourceSize": {"w":22,"h":24}
+},
+"run1.png":
+{
+	"frame": {"x":65,"y":1,"w":28,"h":28},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":28},
+	"sourceSize": {"w":28,"h":28}
+},
+"run2.png":
+{
+	"frame": {"x":103,"y":1,"w":28,"h":28},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":28},
+	"sourceSize": {"w":28,"h":28}
+},
+"run3.png":
+{
+	"frame": {"x":141,"y":1,"w":28,"h":28},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":28},
+	"sourceSize": {"w":28,"h":28}
+},
+"run4.png":
+{
+	"frame": {"x":179,"y":1,"w":28,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":28},
 	"sourceSize": {"w":28,"h":28}
 }},
 "animations": {
+	"enemy": ["enemy1.png","enemy2.png"],
+	"run": ["run1.png","run2.png","run3.png","run4.png"]
 },
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
 	"image": "tileset.png",
 	"format": "RGBA8888",
-	"size": {"w":50,"h":28},
+	"size": {"w":208,"h":30},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:1c465f13a10fe27873e3de3312d316ed:0650b5a2a81a399a653aeb864504b44e:ace0e5e82375743ccde85e973fd84fb5$"
+	"smartupdate": "$TexturePacker:SmartUpdate:4406fdde88fcbebcb3cf9c452f1eb715:eb44e4511eea8f59f2f4a162bedfbe5e:ace0e5e82375743ccde85e973fd84fb5$"
 }
 }
