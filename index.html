@@ -1,16 +1,21 @@
 <html>
 <script src="js/pixi.js"></script>
 <style>
-    * {
-        padding: 0;
-        margin: 0
-    }
+    html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+}
 </style>
 
 <body>
     <script type="text/javascript">
         // Keyboard Input
-        let totalenem = 4, hero, hit = [], state, enemy = [], title, endT, end = 0
+        let totalenem = 4, hero, hit = [], state, enemy = [], Stitle, endT, end = 0, sheet, f, score = 0, sp = 1, dp = 0, sText = "Score : ", highscore = 0, hText = "Highscore :"
         function keyboard(value) {
             let key = {};
             key.value = value;
@@ -107,7 +112,7 @@
             return hit;
         }
         // Creating A Canvas
-        let app = new PIXI.Application({ position: "absolute", display: "block", autoResize: true, height: window.innerHeight, width: window.innerWidth })
+        let app = new PIXI.Application({ position: "absolute", display: "block", autoResize: false, height: 600, width: 500 })
         app.renderer.backgroundColor = 0x061639
         document.body.appendChild(app.view)
         // Adding Sprite, Spritesheet and making texture
@@ -117,18 +122,20 @@
             .load(setup)
         function setup() {
             let Tstyle = new PIXI.TextStyle({ fill: "white" })
-            let Estyle = new PIXI.TextStyle({ fill: "white", fontSize: 30, dropShadow: true })
-            title = new PIXI.Text("My First Game", Tstyle)
-            endT = new PIXI.Text("GAME OVER", Estyle)
-            title.position.set((app.view.width / 2) - 100, 10)
-            endT.position.set((app.view.width / 2) - 100, (app.view.height / 2) - 100)
-            app.stage.addChild(title)
+            let Estyle = new PIXI.TextStyle({ fill: "white", fontSize: 30, dropShadow: true, align: "center" })
+            Stitle = new PIXI.Text(sText + score, Tstyle)
+            Htitle = new PIXI.Text(hText + highscore, Tstyle)
+            endT = new PIXI.Text("GAME OVER \n press F to restart ", Estyle)
+            Stitle.position.set((app.view.width / 2) - 80, 20)
+            Htitle.position.set((app.view.width / 2) - 80, 50)
+            endT.position.set((app.view.width / 2) - 120, (app.view.height / 2) - 100)
+            app.stage.addChild(Stitle)
+            app.stage.addChild(Htitle)
             endT.visible = false
             app.stage.addChild(endT)
-            let sheet = PIXI.Loader.shared.resources["assets/tileset.json"].spritesheet;
+            sheet = PIXI.Loader.shared.resources["assets/tileset.json"].spritesheet;
             // selecting image from spritesheet
             hero = new PIXI.Sprite(sheet.textures["idle.png"])
-            let tenemy = new PIXI.Sprite(sheet.textures["enemy1.png"])
             let balloon = PIXI.Sprite.from("assets/v1.png")
             /* Setting position
             balloon.x = 96
@@ -146,23 +153,13 @@
             app.stage.addChild(balloon)
             balloon.visible = false
             // adding multiple enemies with random y and distance between them
-            let xoffset = 80
-            spacing = 30
-            for (i = 1; i <= totalenem; i++) {
-                let tenemy = new PIXI.Sprite(sheet.textures["enemy1.png"]);
-                tenemy.scale.set(2, 2)
-                yloc = rInt(40, app.view.height - tenemy.height - 40)
-                tenemy.position.set(xoffset = (i * spacing) + xoffset, yloc)
-                hit.push(0)
-                enemy.push(tenemy)
-                app.stage.addChild(tenemy)
-            }
             // setting hero location and scale
             hero.position.set(20, (app.view.height) / 2)
             hero.scale.set(2, 2)
             hero.vx = 0
             state = play
             app.stage.addChild(hero)
+            Initenemy()
             let right = keyboard("d"), left = keyboard("a")
             right.press = () => { hero.vx = 2 }
             right.release = () => {
@@ -176,13 +173,28 @@
             }
             app.ticker.add(delta => gameloop(delta))
         }
+        function Initenemy() {
+            let xoffset = 80
+            spacing = 30
+            for (i = 1; i <= totalenem; i++) {
+                let tenemy = new PIXI.Sprite(sheet.textures["enemy1.png"]);
+                tenemy.scale.set(2, 2)
+                yloc = rInt(40, app.view.height - tenemy.height - 40)
+                tenemy.position.set(xoffset = (i * spacing) + xoffset, yloc)
+                hit.push(0)
+                enemy.push(tenemy)
+                app.stage.addChild(tenemy)
+            }
+        }
         function gameloop(delta) {
             // hero basic movement by calling play function
             state(play)
         }
         function play(delta) {
-            for (i = 1; i <= totalenem; i++) {
-                if (end == 0) {
+            if (!end) {
+                Stitle.text = sText + score
+                Htitle.text = hText + highscore
+                for (i = 1; i <= totalenem; i++) {
                     if (hit[i - 1] == 0) {
                         if (enemy[i - 1].y < app.view.height - enemy[i - 1].height - 40) {
                             enemy[i - 1].vy = 1
@@ -200,14 +212,55 @@
                             hit[i - 1] = 0
                     }
                     if (hitTest(hero, enemy[i - 1])) {
+                        f = keyboard("f")
                         endT.visible = true
-                        hero.position.set(20, (app.view.height) / 2)
-                        end = 1
-
+                        end = true
+                        f.press = () => { restart() }
                     }
                 }
+                if(hero.x < 430){
+                    if(hero.x == 20 && hero.vx == -2){
+                        if(dp == 1){
+                            dp = 0
+                            sp = 1
+                            score += 50
+                            if(score > highscore)
+                                highscore = score
+                        }
+                        hero.x = 20
+                    }
+                    else
+                        hero.x += hero.vx
+                }
+                else
+                    if(hero.x == 430 && hero.vx == 2){
+                        if(sp == 1){
+                            dp = 1
+                            sp = 0
+                            score += 50
+                            if(score > highscore)
+                                highscore = score
+
+                        }
+                        hero.x = 430
+                    }
+                        else
+                            hero.x += hero.vx
+                }
+        }
+        function restart() {
+            hero.position.set(20, (app.view.height) / 2)
+            endT.visible = false
+            score = 0
+            sp = 1
+            dp = 0
+            for (i = 0; i <= totalenem; i++) {
+                app.stage.removeChild(enemy[i - 1])
             }
-            hero.x += hero.vx
+            enemy = []
+            end = false
+            Initenemy()
+
         }
         // function to return a random integer between given max and min
         function rInt(max, min) {
